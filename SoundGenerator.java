@@ -5,6 +5,8 @@ import java.util.List;
 import javax.sound.sampled.*;
 
 public class SoundGenerator {
+
+    public static final double STANDART_QUARTER_NOTE = 60.0 / 90.0; // 90 bpm quarter note
     public ByteArrayOutputStream bufferStream = new ByteArrayOutputStream();
 
     public SoundGenerator() {
@@ -14,23 +16,43 @@ public class SoundGenerator {
 
         SoundGenerator soundGenerator = new SoundGenerator();
 
-        Track track1 = new Track("1", 100, "SAWTOOTH");
+        Track track1 = new Track("1", 90, "SAWTOOTH");
+        track1.volume = 0.2;
         track1.addNote(new Sound(SoundGenerator.Note.A4_SHARP.frequency, track1.quarterNote));
         track1.addNote(new Sound(SoundGenerator.Note.F4.frequency * 2, track1.quarterNote));
         track1.addNote(new Sound(SoundGenerator.Note.G4.frequency, track1.quarterNote));
         track1.addNote(new Sound(SoundGenerator.Note.E4.frequency * 2, track1.wholeNote));
-        Track track2 = new Track("2", 100, "SQUARE");
+        Track track2 = new Track("2", 90, "SQUARE");
+        track2.volume = 0.2;
         track2.addNote(new Sound(SoundGenerator.Note.A4_SHARP.frequency / 16, track2.quarterNote));
         track2.addNote(new Sound(SoundGenerator.Note.F4.frequency / 8, track2.quarterNote));
         track2.addNote(new Sound(SoundGenerator.Note.G4.frequency / 16, track2.quarterNote));
         track2.addNote(new Sound(SoundGenerator.Note.E4.frequency / 8, track2.halfNote));
         track2.addNote(new Sound(0, track2.halfNote));
-        // track2.addNote(new Sound(SoundGenerator.Note.E4.frequency / 8, track2.halfNote));
+        Track track3 = new Track("drum", 90, "SQUARE");
+        track3.volume = 0.2;
+        track3.addNote(SoundGenerator.Sounds.SNARE.sound);
+        track3.addNote(SoundGenerator.Sounds.SNARE.sound);
+        track3.addNote(SoundGenerator.Sounds.SNARE.sound);
+        track3.addNote(SoundGenerator.Sounds.SNARE.sound);
+        Track track5 = new Track("drum", 90, "SAWTOOTH");
+        track5.volume = 0.4;
+        track5.addNote(SoundGenerator.Sounds.SNARE.sound);
+        track5.addNote(SoundGenerator.Sounds.SNARE.sound);
+        track5.addNote(SoundGenerator.Sounds.SNARE.sound);
+        track5.addNote(SoundGenerator.Sounds.SNARE.sound);
+        Track track4 = new Track("drum", 90, "SINE");
+        track4.volume = 1;
+        track4.addNote(SoundGenerator.Sounds.SNARE.sound);
+        track4.addNote(new Sound(track3.quarterNote));
+        track4.addNote(SoundGenerator.Sounds.SNARE.sound);
+        track4.addNote(new Sound(track3.quarterNote));
 
         // soundGenerator.playTrack(track1);
         // track1.setVolume(1.0);
-        // soundGenerator.playTrack(track2);
-        soundGenerator.combineTracks(List.of(track1, track2));
+        // soundGenerator.playTrack(track5);
+        // soundGenerator.playTrack(track4);
+        soundGenerator.combineTracks(List.of(track1, track2, track3, track4, track5));
 
     }
 
@@ -83,7 +105,7 @@ public class SoundGenerator {
                     combinedValue += buffer[i];
                 }
             }
-            combinedValue = Math.min(Math.max(combinedValue / trackList.size(), -128), 127);
+            combinedValue = Math.min(Math.max((int) (combinedValue / Math.sqrt(trackList.size())), -128), 127);
             combinedBuffer[i] = (byte) combinedValue;
         }
         int maxSampleRate = 0;
@@ -102,6 +124,16 @@ public class SoundGenerator {
 
         Note(double frequency) {
             this.frequency = frequency;
+        }
+    }
+
+    public enum Sounds {
+        SNARE(new Sound(SoundGenerator.Note.A4.frequency, STANDART_QUARTER_NOTE, 0.001, 0.04, 0)),;
+
+        public final Sound sound;
+
+        Sounds(Sound sound) {
+            this.sound = sound;
         }
     }
 }

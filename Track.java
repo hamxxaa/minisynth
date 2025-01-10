@@ -34,9 +34,28 @@ public class Track {
     }
 
     public void addNote(Sound sound) {
-        for (int i = 0; i < sampleRate * sound.duration; i++) {
+        int attack = (int) (sound.attack * sampleRate * sound.duration);
+        int release = (int) (sound.release * sampleRate * sound.duration);
+        int sustain = (int) (sound.sustain * sampleRate * sound.duration);
+        int total = (int) (sampleRate * sound.duration);
+
+        for (int i = 0; i < attack; i++) {
+            double angle = 2.0 * Math.PI * i * sound.frequency / sampleRate;
+            bufferStream.write(createWave(angle) * i / attack);
+        }
+
+        for (int i = attack; i < attack + sustain; i++) {
             double angle = 2.0 * Math.PI * i * sound.frequency / sampleRate;
             bufferStream.write(createWave(angle));
+        }
+
+        for (int i = attack + sustain; i < attack + sustain + release; i++) {
+            double angle = 2.0 * Math.PI * i * sound.frequency / sampleRate;
+            bufferStream.write(createWave(angle) * (total - i) / release);
+        }
+
+        for (int i = attack + sustain + release; i < total; i++) {
+            bufferStream.write((byte) 0);
         }
     }
 
